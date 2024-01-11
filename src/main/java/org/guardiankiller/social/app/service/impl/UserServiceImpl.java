@@ -10,18 +10,27 @@ import org.guardiankiller.social.app.model.User;
 import org.guardiankiller.social.app.repository.UserRepo;
 import org.guardiankiller.social.app.service.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
+
     private final UserRepo userRepo;
+
+    private final PasswordEncoder passwordEncoder;
     private final Pattern emailValidator = Pattern.compile("^[\\w.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
 
     @Override
@@ -47,6 +56,7 @@ public class UserServiceImpl implements UserService {
         if (createDTO.getDateOfBirth().isAfter(LocalDate.now().minusYears(13))) {
             throw new ServerException("You must be at least 13 years old.", HttpStatus.BAD_REQUEST);
         }
+        validatePasswords(createDTO);
 
         User user = new User();
         user.setUsername(createDTO.getUsername());
@@ -55,7 +65,26 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(createDTO.getFirstName());
         user.setLastName(createDTO.getLastName());
         user.setDateOfBirth(createDTO.getDateOfBirth());
+        user.setHash(passwordEncoder.encode(createDTO.getPassword()));
         userRepo.save(user);
+    }
+
+    private void validatePasswords(UserCreateDTO userCreateDTO) {
+        String invalidPasswordMessage = "A valid password should be between 8 and 26 characters";
+        String password = userCreateDTO.getPassword();
+        String confirm = userCreateDTO.getConfirmPassword();
+        if(password == null) {
+            throw new ServerException(invalidPasswordMessage, HttpStatus.BAD_REQUEST);
+        }
+        password = password.trim();
+        int len = password.length();
+        if(len < 8 || len > 26) {
+            throw new ServerException(invalidPasswordMessage, HttpStatus.BAD_REQUEST);
+        }
+
+        if(confirm == null || !confirm.trim().equals(password)) {
+            throw new ServerException("Passwords must match", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
@@ -165,4 +194,33 @@ public class UserServiceImpl implements UserService {
 //        return true;
     }
 
+    @Override
+    public boolean authenticateUser(String username, String password) {
+        return userRepo
+                   .findById(username)
+                   .map(user -> passwordEncoder.matches(password, user.getHash()))
+                   .orElse(false);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username, LocalDateTime verifyDate) {
+        var user = userRepo
+                       .findById(username)
+                       .orElseThrow(()->new UsernameNotFoundException("Username not found"));
+        if(user.getUpdatedDateTime().minusMinutes(10).isAfter(verifyDate)) {
+            throw new ServerException("Token expired", HttpStatus.UNAUTHORIZED);
+        }
+        return new org.springframework.security.core.userdetails
+                       .User(user.getUsername(), user.getHash(), Set.of());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        var user = userRepo.findById(username)
+                           .orElseThrow(()->new UsernameNotFoundException("User "+username+" not found"));
+        return new org.springframework.security.core.userdetails.User(
+            user.getUsername(), user.getHash(), List.of()
+        );
+    }
 }
