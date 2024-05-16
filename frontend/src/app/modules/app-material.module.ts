@@ -14,6 +14,7 @@ import { MatSnackBarModule } from "@angular/material/snack-bar"
 import { MatSelectModule } from '@angular/material/select'
 
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { MatDialogModule } from "@angular/material/dialog";
 
 let modules: any[] = [
     MatToolbarModule,
@@ -28,7 +29,8 @@ let modules: any[] = [
     MatListModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatSelectModule
+    MatSelectModule,
+    MatDialogModule,
 ]
 
 @NgModule({

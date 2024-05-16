@@ -17,7 +17,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { authInterceptorProvider } from './services/user-authentication.service';
 import { ImageViewPageComponent } from './components/pages/image-view-page/image-view-page.component';
 import { ErrorPageComponent } from './components/pages/error-page/error-page.component';
+import { FormCardPanelComponent } from './components/layouts/form-card-panel/form-card-panel.component'
 import { DatePipe } from '@angular/common';
+import { UserEditDialogComponent } from './components/dialogs/user-edit-dialog/user-edit-dialog.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +31,9 @@ import { DatePipe } from '@angular/common';
     ProfilePanelSideComponent,
     LoginPageComponent,
     ImageViewPageComponent,
-    ErrorPageComponent
+    ErrorPageComponent,
+    FormCardPanelComponent,
+    UserEditDialogComponent
   ],
   imports: [
     BrowserModule,
