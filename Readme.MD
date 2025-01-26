@@ -5,6 +5,13 @@ The Social App is an application to create, comment and like posts of your frien
  - Login & Register a user
  - Edit user information
  - Profile page
+ 
+## Preview images
+
+<img src="https://github.com/jitzerttok51/social-app/blob/add-readme/preview/viber_image_2025-01-26_22-51-39-662.png?raw=true" width="800"/>
+<img src="https://github.com/jitzerttok51/social-app/blob/add-readme/preview/viber_image_2025-01-26_22-51-48-958.png?raw=true" width="800"/>
+<img src="https://github.com/jitzerttok51/social-app/blob/add-readme/preview/viber_image_2025-01-26_22-52-37-172.png?raw=true" width="800"/>
+<img src="https://github.com/jitzerttok51/social-app/blob/add-readme/preview/viber_image_2025-01-26_22-52-51-344.png?raw=true" width="800"/>
 
 ## App Details
 - This app is written in `Spring Boot`. It uses `Spring Security` for authentication. Authentication is with JWT 
